@@ -1,53 +1,52 @@
 package org.scud.map;
 
-import org.junit.Test;
-
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
-
+import org.junit.Test;
 import static org.junit.Assert.*;
 
 public class MyHashMapTest {
 
     @Test
     public void size() {
-        MyHashMap<String, String> map = new MyHashMap<String, String>();
+        MyHashMap<String, String> map = new MyHashMap<>();
         assertEquals(0, map.size());
     }
 
     @Test
     public void sizeOne() {
-        MyHashMap<String, String> map = new MyHashMap<String, String>();
+        MyHashMap<String, String> map = new MyHashMap<>();
         map.put("key", "value");
         assertEquals(1, map.size());
     }
 
     @Test
     public void sizeMany() {
-        MyHashMap<String, String> map = new MyHashMap<String, String>();
+        MyHashMap<String, String> map = new MyHashMap<>();
         map.put("key", "value");
         map.put("key1", "value1");
         map.put("key2", "value2");
         assertEquals(3, map.size());
     }
 
+    @SuppressWarnings({"ConstantConditions", "MismatchedQueryAndUpdateOfCollection"})
     @Test
     public void isEmptyTrue() {
-        MyHashMap<String, String> map = new MyHashMap<String, String>();
+        MyHashMap<String, String> map = new MyHashMap<>();
         assertTrue(map.isEmpty());
     }
 
     @Test
     public void isEmptyFalse() {
-        MyHashMap<String, String> map = new MyHashMap<String, String>();
+        MyHashMap<String, String> map = new MyHashMap<>();
         map.put("key", "value");
         assertFalse(map.isEmpty());
     }
 
     @Test
     public void containsKeyTrue() {
-        MyHashMap<String, String> map = new MyHashMap<String, String>();
+        MyHashMap<String, String> map = new MyHashMap<>();
         map.put("key", "value");
         map.put("key1", "value1");
         map.put("key2", "value2");
@@ -56,7 +55,7 @@ public class MyHashMapTest {
 
     @Test
     public void containsKeyFalse() {
-        MyHashMap<String, String> map = new MyHashMap<String, String>();
+        MyHashMap<String, String> map = new MyHashMap<>();
         map.put("key", "value");
         map.put("key1", "value1");
         map.put("key2", "value2");
@@ -65,7 +64,7 @@ public class MyHashMapTest {
 
     @Test
     public void containsValueTrue() {
-        MyHashMap<String, String> map = new MyHashMap<String, String>();
+        MyHashMap<String, String> map = new MyHashMap<>();
         map.put("key", "value");
         map.put("key1", "value1");
         map.put("key2", "value2");
@@ -74,7 +73,7 @@ public class MyHashMapTest {
 
     @Test
     public void containsValueFalse() {
-        MyHashMap<String, String> map = new MyHashMap<String, String>();
+        MyHashMap<String, String> map = new MyHashMap<>();
         map.put("key", "value");
         map.put("key1", "value1");
         map.put("key2", "value2");
@@ -83,7 +82,7 @@ public class MyHashMapTest {
 
     @Test
     public void get() {
-        MyHashMap<String, String> map = new MyHashMap<String, String>();
+        MyHashMap<String, String> map = new MyHashMap<>();
         map.put("key", "value");
         map.put("key1", "value1");
         map.put("key2", "value2");
@@ -92,7 +91,7 @@ public class MyHashMapTest {
 
     @Test
     public void getNull() {
-        MyHashMap<String, String> map = new MyHashMap<String, String>();
+        MyHashMap<String, String> map = new MyHashMap<>();
         map.put("key", "value");
         map.put("key1", "value1");
         map.put("key2", "value2");
@@ -101,7 +100,7 @@ public class MyHashMapTest {
 
     @Test
     public void put() {
-        MyHashMap<String, String> map = new MyHashMap<String, String>();
+        MyHashMap<String, String> map = new MyHashMap<>();
         map.put("key", "value");
         map.put("key1", "value1");
         map.put("key2", "value2");
@@ -110,7 +109,7 @@ public class MyHashMapTest {
 
     @Test
     public void remove() {
-        MyHashMap<String, String> map = new MyHashMap<String, String>();
+        MyHashMap<String, String> map = new MyHashMap<>();
         map.put("key", "value");
         map.put("key1", "value1");
         map.put("key2", "value2");
@@ -120,8 +119,8 @@ public class MyHashMapTest {
 
     @Test
     public void putAll() {
-        MyHashMap<String, String> map = new MyHashMap<String, String>();
-        HashMap<String, String> map2 = new HashMap<String, String>();
+        MyHashMap<String, String> map = new MyHashMap<>();
+        HashMap<String, String> map2 = new HashMap<>();
         map2.put("key", "value");
         map2.put("key1", "value1");
         map2.put("key2", "value2");
@@ -132,7 +131,7 @@ public class MyHashMapTest {
     @SuppressWarnings("RedundantOperationOnEmptyContainer")
     @Test
     public void clear() {
-        MyHashMap<String, String> map = new MyHashMap<String, String>();
+        MyHashMap<String, String> map = new MyHashMap<>();
         map.put("key", "value");
         map.put("key1", "value1");
         map.put("key2", "value2");
@@ -142,10 +141,10 @@ public class MyHashMapTest {
 
     @Test
     public void keySet() {
-        MyHashMap<String, String> map = new MyHashMap<String, String>();
+        MyHashMap<String, String> map = new MyHashMap<>();
         map.put("key", "value");
         map.put("key1", "value1");
         map.put("key2", "value2");
-        assertEquals(new HashSet<String>(Arrays.asList("key", "key1", "key2")), map.keySet());
+        assertEquals(new HashSet<>(Arrays.asList("key", "key1", "key2")), map.keySet());
     }
 }

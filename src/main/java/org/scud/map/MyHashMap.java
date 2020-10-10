@@ -1,6 +1,9 @@
 package org.scud.map;
 
-import java.util.*;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
 
 public class MyHashMap<K, V> implements Map<K, V> {
     private int tableSize = 160;
@@ -12,40 +15,44 @@ public class MyHashMap<K, V> implements Map<K, V> {
     @Override
     public int size() {
         int size = 0;
-        for (Object o : table)
-            if (o != null)
+        for (Object o : table) {
+            if (o != null) {
                 size++;
+            }
+        }
         return size;
     }
 
     @Override
     public boolean isEmpty() {
-        return size()==0;
+        return size() == 0;
     }
 
     @Override
     public boolean containsKey(Object key) {
-        return table[key.hashCode()%tableSize] != null;
+        return table[key.hashCode() % tableSize] != null;
     }
 
     @Override
     public boolean containsValue(Object value) {
-        for (K k : keys)
-            if (get(k).equals(value))
+        for (K k : keys) {
+            if (get(k).equals(value)) {
                 return true;
+            }
+        }
         return false;
     }
 
     @Override
     @SuppressWarnings("unchecked")
     public V get(Object key) {
-        return (V) table[key.hashCode()%tableSize];
+        return (V) table[key.hashCode() % tableSize];
     }
 
     @Override
     @SuppressWarnings("unchecked")
     public V put(Object key, Object value) {
-        table[key.hashCode()%tableSize] = value;
+        table[key.hashCode() % tableSize] = value;
         keys.add((K) key);
         return (V) value;
     }//add check
@@ -53,16 +60,18 @@ public class MyHashMap<K, V> implements Map<K, V> {
     @Override
     @SuppressWarnings("unchecked")
     public V remove(Object key) {
-        Object o = table[key.hashCode()%tableSize];
-        table[key.hashCode()%tableSize] = null;
-        keys.remove((K) key);
+        Object o = table[key.hashCode() % tableSize];
+        table[key.hashCode() % tableSize] = null;
+        //noinspection SuspiciousMethodCalls
+        keys.remove(key);
         return (V) o;
     }
 
     @Override
     public void putAll(Map m) {
-        for(Object o : m.keySet())
+        for (Object o : m.keySet()) {
             put(o, m.get(o));
+        }
     }
 
     @Override
@@ -76,11 +85,13 @@ public class MyHashMap<K, V> implements Map<K, V> {
         return (Set<K>) keys.clone();
     }
 
+    @SuppressWarnings("ConstantConditions")
     @Override
-    public Collection values() {
+    public Collection<V> values() {
         return null;
     }
 
+    @SuppressWarnings("ConstantConditions")
     @Override
     public Set<Entry<K, V>> entrySet() {
         return null;
