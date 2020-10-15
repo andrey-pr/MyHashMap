@@ -1,16 +1,25 @@
 package org.scud.map;
 
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 public class MyHashMap<K, V> implements Map<K, V> {
-    private int tableSize = 160;
+    private int tableSize = 16;
 
 
     private Object[] table = new Object[tableSize];
-    private HashSet<K> keys = new HashSet<>();
+    private final HashSet<K> keys = new HashSet<>();
+
+    private void resize() {
+        if (size() > tableSize * 0.5) {
+            Object[] oldTable = table;
+            int oldTableSize = tableSize;
+            tableSize *= 2;
+            table = new Object[tableSize];
+            for (K key : keys) {
+                table[key.hashCode() % tableSize] = oldTable[key.hashCode() % oldTableSize];
+            }
+        }
+    }
 
     @Override
     public int size() {
@@ -52,6 +61,7 @@ public class MyHashMap<K, V> implements Map<K, V> {
     @Override
     @SuppressWarnings("unchecked")
     public V put(Object key, Object value) {
+        resize();
         table[key.hashCode() % tableSize] = value;
         keys.add((K) key);
         return (V) value;
@@ -70,6 +80,7 @@ public class MyHashMap<K, V> implements Map<K, V> {
     @Override
     public void putAll(Map m) {
         for (Object o : m.keySet()) {
+            resize();
             put(o, m.get(o));
         }
     }
@@ -85,10 +96,16 @@ public class MyHashMap<K, V> implements Map<K, V> {
         return (Set<K>) keys.clone();
     }
 
-    @SuppressWarnings("ConstantConditions")
+    @SuppressWarnings("unchecked")
     @Override
     public Collection<V> values() {
-        return null;
+        ArrayList<V> al = new ArrayList<>();
+        for (Object value : table) {
+            if (value != null) {
+                al.add((V) value);
+            }
+        }
+        return al;
     }
 
     @SuppressWarnings("ConstantConditions")

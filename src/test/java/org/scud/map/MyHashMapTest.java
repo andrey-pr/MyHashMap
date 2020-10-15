@@ -3,11 +3,23 @@ package org.scud.map;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
+
 import org.junit.Test;
+
 import static org.junit.Assert.*;
 
 public class MyHashMapTest {
 
+    @Test
+    public void resize() {
+        MyHashMap<String, String> map = new MyHashMap<>();
+        for (int i = 0; i < 20; i++) {
+            map.put("" + i, "" + i);
+        }
+        assertEquals(20, map.size());
+    }
+
+    @SuppressWarnings("MismatchedQueryAndUpdateOfCollection")
     @Test
     public void size() {
         MyHashMap<String, String> map = new MyHashMap<>();
@@ -146,5 +158,16 @@ public class MyHashMapTest {
         map.put("key1", "value1");
         map.put("key2", "value2");
         assertEquals(new HashSet<>(Arrays.asList("key", "key1", "key2")), map.keySet());
+    }
+
+    @Test
+    public void values() {
+        MyHashMap<String, String> map = new MyHashMap<>();
+        map.put("key", "value");
+        map.put("key1", "value1");
+        map.put("key2", "value2");
+        if (!map.containsValue("value") || !map.containsValue("value1") || !map.containsValue("value2")) {
+            fail();
+        }
     }
 }
