@@ -9,7 +9,7 @@ public class MyHashMap<K, V> implements Map<K, V> {
     private Object[] table = new Object[tableSize];
     private final HashSet<K> keys = new HashSet<>();
 
-    private void resize() {
+    private void expand() {
         if (size() > tableSize * 0.5) {
             Object[] oldTable = table;
             int oldTableSize = tableSize;
@@ -61,7 +61,9 @@ public class MyHashMap<K, V> implements Map<K, V> {
     @Override
     @SuppressWarnings("unchecked")
     public V put(Object key, Object value) {
-        resize();
+        while (table[key.hashCode() % tableSize] != null) {
+            expand();
+        }
         table[key.hashCode() % tableSize] = value;
         keys.add((K) key);
         return (V) value;
@@ -80,7 +82,9 @@ public class MyHashMap<K, V> implements Map<K, V> {
     @Override
     public void putAll(Map m) {
         for (Object o : m.keySet()) {
-            resize();
+            while (table[o.hashCode() % tableSize] != null) {
+                expand();
+            }
             put(o, m.get(o));
         }
     }
