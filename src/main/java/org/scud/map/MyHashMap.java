@@ -10,14 +10,12 @@ public class MyHashMap<K, V> implements Map<K, V> {
     private final HashSet<K> keys = new HashSet<>();
 
     private void expand() {
-        if (size() > tableSize * 0.5) {
-            Object[] oldTable = table;
-            int oldTableSize = tableSize;
-            tableSize *= 2;
-            table = new Object[tableSize];
-            for (K key : keys) {
-                table[key.hashCode() % tableSize] = oldTable[key.hashCode() % oldTableSize];
-            }
+        Object[] oldTable = table;
+        int oldTableSize = tableSize;
+        tableSize *= 2;
+        table = new Object[tableSize];
+        for (K key : keys) {
+            table[key.hashCode() % tableSize] = oldTable[key.hashCode() % oldTableSize];
         }
     }
 
