@@ -10,6 +10,15 @@ import org.junit.Test;
 public class MyHashMapTest {
 
     @Test
+    public void initialSize() {
+        MyHashMap<String, String> map = new MyHashMap<>(20);
+        for (int i = 0; i < 20; i++) {
+            map.put("" + i, "" + i);
+        }
+        assertEquals(20, map.size());
+    }
+
+    @Test
     public void resize() {
         MyHashMap<String, String> map = new MyHashMap<>();
         for (int i = 0; i < 20; i++) {
@@ -41,7 +50,7 @@ public class MyHashMapTest {
         assertEquals(3, map.size());
     }
 
-    @SuppressWarnings({"ConstantConditions", "MismatchedQueryAndUpdateOfCollection"})
+    @SuppressWarnings({"MismatchedQueryAndUpdateOfCollection"})
     @Test
     public void isEmptyTrue() {
         MyHashMap<String, String> map = new MyHashMap<>();

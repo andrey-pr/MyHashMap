@@ -9,6 +9,13 @@ public class MyHashMap<K, V> implements Map<K, V> {
     private Object[] table = new Object[tableSize];
     private final HashSet<K> keys = new HashSet<>();
 
+    public MyHashMap(){}
+
+    public MyHashMap(int initialSize){
+        tableSize = initialSize;
+        table = new Object[tableSize];
+    }
+
     private void expand() {
         Object[] oldTable = table;
         int oldTableSize = tableSize;
@@ -21,13 +28,7 @@ public class MyHashMap<K, V> implements Map<K, V> {
 
     @Override
     public int size() {
-        int size = 0;
-        for (Object o : table) {
-            if (o != null) {
-                size++;
-            }
-        }
-        return size;
+        return keys.size();
     }
 
     @Override
@@ -90,6 +91,7 @@ public class MyHashMap<K, V> implements Map<K, V> {
     @Override
     public void clear() {
         table = new Object[tableSize];
+        keys.clear();
     }
 
     @Override
