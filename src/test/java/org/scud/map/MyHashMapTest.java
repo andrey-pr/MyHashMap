@@ -3,6 +3,7 @@ package org.scud.map;
 import static org.junit.Assert.*;
 
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import org.junit.Test;
@@ -50,7 +51,7 @@ public class MyHashMapTest {
         assertEquals(3, map.size());
     }
 
-    @SuppressWarnings({"MismatchedQueryAndUpdateOfCollection"})
+    @SuppressWarnings({"MismatchedQueryAndUpdateOfCollection", "ConstantConditions"})
     @Test
     public void isEmptyTrue() {
         MyHashMap<String, String> map = new MyHashMap<>();
@@ -174,7 +175,8 @@ public class MyHashMapTest {
         map.put("key", "value");
         map.put("key1", "value1");
         map.put("key2", "value2");
-        if (!map.containsValue("value") || !map.containsValue("value1") || !map.containsValue("value2")) {
+        Collection<String> col = map.values();
+        if (!col.contains("value") || !col.contains("value1") || !col.contains("value2")) {
             fail();
         }
     }

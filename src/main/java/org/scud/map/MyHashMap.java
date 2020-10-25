@@ -8,7 +8,7 @@ public class MyHashMap<K, V> implements Map<K, V> {
 
     private KeyValue[] table = new KeyValue[tableSize];
 
-    private class KeyValue{
+    private static class KeyValue{
         Object key;
         Object value;
 
@@ -27,18 +27,26 @@ public class MyHashMap<K, V> implements Map<K, V> {
     }
 
     private void expand() {
-        Object[] oldTable = table;
+        KeyValue[] oldTable = table;
         int oldTableSize = tableSize;
         tableSize *= 2;
-        table = new Object[tableSize];
-        for (K key : keys) {
-            table[key.hashCode() % tableSize] = oldTable[key.hashCode() % oldTableSize];
+        table = new KeyValue[tableSize];
+        for (int i = 0; i < oldTableSize; i++) {
+            if(oldTable[i] != null) {
+                table[oldTable[i].key.hashCode() % tableSize] = oldTable[oldTable[i].key.hashCode() % oldTableSize];
+            }
         }
     }
 
     @Override
     public int size() {
-        return keys.size();
+        int size = 0;
+        for (int i = 0; i < tableSize; i++) {
+            if(table[i] != null) {
+                size++;
+            }
+        }
+        return size;
     }
 
     @Override
@@ -53,9 +61,11 @@ public class MyHashMap<K, V> implements Map<K, V> {
 
     @Override
     public boolean containsValue(Object value) {
-        for (K k : keys) {
-            if (get(k).equals(value)) {
-                return true;
+        for (int i = 0; i < tableSize; i++) {
+            if(table[i] != null) {
+                if (table[i].value.equals(value)) {
+                    return true;
+                }
             }
         }
         return false;
@@ -64,7 +74,12 @@ public class MyHashMap<K, V> implements Map<K, V> {
     @Override
     @SuppressWarnings("unchecked")
     public V get(Object key) {
-        return (V) table[key.hashCode() % tableSize];
+        if(table[key.hashCode() % tableSize] != null) {
+            return (V) table[key.hashCode() % tableSize].value;
+        }
+        else {
+            return null;
+        }
     }
 
     @Override
@@ -73,18 +88,15 @@ public class MyHashMap<K, V> implements Map<K, V> {
         while (table[key.hashCode() % tableSize] != null) {
             expand();
         }
-        table[key.hashCode() % tableSize] = value;
-        keys.add((K) key);
+        table[key.hashCode() % tableSize] = new KeyValue(key, value);
         return (V) value;
-    }//add check
+    }
 
     @Override
     @SuppressWarnings("unchecked")
     public V remove(Object key) {
-        Object o = table[key.hashCode() % tableSize];
+        Object o = table[key.hashCode() % tableSize].value;
         table[key.hashCode() % tableSize] = null;
-        //noinspection SuspiciousMethodCalls
-        keys.remove(key);
         return (V) o;
     }
 
@@ -100,23 +112,28 @@ public class MyHashMap<K, V> implements Map<K, V> {
 
     @Override
     public void clear() {
-        table = new Object[tableSize];
-        keys.clear();
+        table = new KeyValue[tableSize];
     }
 
     @Override
     @SuppressWarnings("unchecked")
     public Set<K> keySet() {
-        return (Set<K>) keys.clone();
+        HashSet<K> keys = new HashSet<>();
+        for (KeyValue kv : table) {
+            if (kv != null) {
+                keys.add((K) kv.key);
+            }
+        }
+        return keys;
     }
 
     @SuppressWarnings("unchecked")
     @Override
     public Collection<V> values() {
         ArrayList<V> al = new ArrayList<>();
-        for (Object value : table) {
-            if (value != null) {
-                al.add((V) value);
+        for (KeyValue kv : table) {
+            if (kv != null) {
+                al.add((V) kv.value);
             }
         }
         return al;
