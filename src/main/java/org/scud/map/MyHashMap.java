@@ -6,14 +6,24 @@ public class MyHashMap<K, V> implements Map<K, V> {
     private int tableSize = 16;
 
 
-    private Object[] table = new Object[tableSize];
-    private final HashSet<K> keys = new HashSet<>();
+    private KeyValue[] table = new KeyValue[tableSize];
 
-    public MyHashMap(){}
+    private class KeyValue{
+        Object key;
+        Object value;
+
+        public KeyValue(Object key, Object value) {
+            this.key = key;
+            this.value = value;
+        }
+    }
+
+    public MyHashMap(){
+    }
 
     public MyHashMap(int initialSize){
         tableSize = initialSize;
-        table = new Object[tableSize];
+        table = new KeyValue[tableSize];
     }
 
     private void expand() {
