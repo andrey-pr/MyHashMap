@@ -6,33 +6,36 @@ public class MyHashMap<K, V> implements Map<K, V> {
     private int tableSize = 16;
 
 
-    private KeyValue[] table = new KeyValue[tableSize];
+    @SuppressWarnings("unchecked")
+    private KeyValue<K, V>[] table = new KeyValue[tableSize];
 
-    private static class KeyValue{
-        Object key;
-        Object value;
+    private static class KeyValue<K, V> {
+        K key;
+        V value;
 
-        public KeyValue(Object key, Object value) {
+        public KeyValue(K key, V value) {
             this.key = key;
             this.value = value;
         }
     }
 
-    public MyHashMap(){
+    public MyHashMap() {
     }
 
-    public MyHashMap(int initialSize){
+    @SuppressWarnings("unchecked")
+    public MyHashMap(int initialSize) {
         tableSize = initialSize;
         table = new KeyValue[tableSize];
     }
 
+    @SuppressWarnings("unchecked")
     private void expand() {
-        KeyValue[] oldTable = table;
+        KeyValue<K, V>[] oldTable = table;
         int oldTableSize = tableSize;
         tableSize *= 2;
         table = new KeyValue[tableSize];
         for (int i = 0; i < oldTableSize; i++) {
-            if(oldTable[i] != null) {
+            if (oldTable[i] != null) {
                 table[oldTable[i].key.hashCode() % tableSize] = oldTable[oldTable[i].key.hashCode() % oldTableSize];
             }
         }
@@ -42,7 +45,7 @@ public class MyHashMap<K, V> implements Map<K, V> {
     public int size() {
         int size = 0;
         for (int i = 0; i < tableSize; i++) {
-            if(table[i] != null) {
+            if (table[i] != null) {
                 size++;
             }
         }
@@ -62,7 +65,7 @@ public class MyHashMap<K, V> implements Map<K, V> {
     @Override
     public boolean containsValue(Object value) {
         for (int i = 0; i < tableSize; i++) {
-            if(table[i] != null) {
+            if (table[i] != null) {
                 if (table[i].value.equals(value)) {
                     return true;
                 }
@@ -72,12 +75,10 @@ public class MyHashMap<K, V> implements Map<K, V> {
     }
 
     @Override
-    @SuppressWarnings("unchecked")
     public V get(Object key) {
-        if(table[key.hashCode() % tableSize] != null) {
-            return (V) table[key.hashCode() % tableSize].value;
-        }
-        else {
+        if (table[key.hashCode() % tableSize] != null) {
+            return table[key.hashCode() % tableSize].value;
+        } else {
             return null;
         }
     }
@@ -88,16 +89,15 @@ public class MyHashMap<K, V> implements Map<K, V> {
         while (table[key.hashCode() % tableSize] != null) {
             expand();
         }
-        table[key.hashCode() % tableSize] = new KeyValue(key, value);
+        table[key.hashCode() % tableSize] = new KeyValue<>((K) key, (V) value);
         return (V) value;
     }
 
     @Override
-    @SuppressWarnings("unchecked")
     public V remove(Object key) {
-        Object o = table[key.hashCode() % tableSize].value;
+        V o = table[key.hashCode() % tableSize].value;
         table[key.hashCode() % tableSize] = null;
-        return (V) o;
+        return o;
     }
 
     @Override
@@ -110,30 +110,29 @@ public class MyHashMap<K, V> implements Map<K, V> {
         }
     }
 
+    @SuppressWarnings("unchecked")
     @Override
     public void clear() {
         table = new KeyValue[tableSize];
     }
 
     @Override
-    @SuppressWarnings("unchecked")
     public Set<K> keySet() {
         HashSet<K> keys = new HashSet<>();
-        for (KeyValue kv : table) {
+        for (KeyValue<K, V> kv : table) {
             if (kv != null) {
-                keys.add((K) kv.key);
+                keys.add(kv.key);
             }
         }
         return keys;
     }
 
-    @SuppressWarnings("unchecked")
     @Override
     public Collection<V> values() {
         ArrayList<V> al = new ArrayList<>();
-        for (KeyValue kv : table) {
+        for (KeyValue<K, V> kv : table) {
             if (kv != null) {
-                al.add((V) kv.value);
+                al.add(kv.value);
             }
         }
         return al;

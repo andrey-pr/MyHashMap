@@ -1,6 +1,10 @@
 package org.scud.map;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 import java.util.Arrays;
 import java.util.Collection;
@@ -140,11 +144,11 @@ public class MyHashMapTest {
 
     @Test
     public void putAll() {
-        MyHashMap<String, String> map = new MyHashMap<>();
         HashMap<String, String> map2 = new HashMap<>();
         map2.put("key", "value");
         map2.put("key1", "value1");
         map2.put("key2", "value2");
+        MyHashMap<String, String> map = new MyHashMap<>();
         map.putAll(map2);
         assertEquals("value1", map.get("key1"));
     }
