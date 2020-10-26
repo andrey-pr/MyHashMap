@@ -1,6 +1,10 @@
 package org.scud.map;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
 
 public class MyHashMap<K, V> implements Map<K, V> {
     private int tableSize = 16;
@@ -36,7 +40,8 @@ public class MyHashMap<K, V> implements Map<K, V> {
         table = new KeyValue[tableSize];
         for (int i = 0; i < oldTableSize; i++) {
             if (oldTable[i] != null) {
-                table[oldTable[i].key.hashCode() % tableSize] = oldTable[oldTable[i].key.hashCode() % oldTableSize];
+                table[oldTable[i].key.hashCode() % tableSize]
+                        = oldTable[oldTable[i].key.hashCode() % oldTableSize];
             }
         }
     }
