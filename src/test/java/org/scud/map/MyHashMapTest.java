@@ -32,6 +32,19 @@ public class MyHashMapTest {
         assertEquals(20, map.size());
     }
 
+    @Test
+    public void resizeCorrectness() {
+        MyHashMap<String, String> map = new MyHashMap<>();
+        for (int i = 0; i < 20; i++) {
+            map.put("" + i, "" + i);
+        }
+        for (int i = 0; i < 20; i++) {
+            if (!map.get("" + i).equals("" + i)) {
+                fail();
+            }
+        }
+    }
+
     @SuppressWarnings("MismatchedQueryAndUpdateOfCollection")
     @Test
     public void size() {

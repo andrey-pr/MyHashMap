@@ -11,7 +11,7 @@ public class MyHashMap<K, V> implements Map<K, V> {
 
 
     @SuppressWarnings("unchecked")
-    private KeyValue<K, V>[] table = new KeyValue[tableSize];
+    private KeyValue<K, V>[][] table = new KeyValue[tableSize][0];
 
     private static class KeyValue<K, V> {
         K key;
@@ -29,19 +29,20 @@ public class MyHashMap<K, V> implements Map<K, V> {
     @SuppressWarnings("unchecked")
     public MyHashMap(int initialSize) {
         tableSize = initialSize;
-        table = new KeyValue[tableSize];
+        table = new KeyValue[tableSize][0];
     }
 
     @SuppressWarnings("unchecked")
     private void expand() {
-        KeyValue<K, V>[] oldTable = table;
-        int oldTableSize = tableSize;
-        tableSize *= 2;
-        table = new KeyValue[tableSize];
-        for (int i = 0; i < oldTableSize; i++) {
-            if (oldTable[i] != null) {
-                table[oldTable[i].key.hashCode() % tableSize]
-                        = oldTable[oldTable[i].key.hashCode() % oldTableSize];
+        if (size() > tableSize / 2) {
+            KeyValue<K, V>[][] oldTable = table;
+            int oldTableSize = tableSize;
+            tableSize *= 2;
+            table = new KeyValue[tableSize][0];
+            for (int i = 0; i < oldTableSize; i++) {
+                for (int a = 0; a < oldTable[i].length; a++) {
+                    putUnchecked(oldTable[i][a].key, oldTable[i][a].value);
+                }
             }
         }
     }
@@ -50,9 +51,7 @@ public class MyHashMap<K, V> implements Map<K, V> {
     public int size() {
         int size = 0;
         for (int i = 0; i < tableSize; i++) {
-            if (table[i] != null) {
-                size++;
-            }
+            size += table[i].length;
         }
         return size;
     }
@@ -64,14 +63,14 @@ public class MyHashMap<K, V> implements Map<K, V> {
 
     @Override
     public boolean containsKey(Object key) {
-        return table[key.hashCode() % tableSize] != null;
+        return get(key) != null;
     }
 
     @Override
     public boolean containsValue(Object value) {
         for (int i = 0; i < tableSize; i++) {
-            if (table[i] != null) {
-                if (table[i].value.equals(value)) {
+            for (int a = 0; a < table[i].length; a++) {
+                if (table[i][a].value.equals(value)) {
                     return true;
                 }
             }
@@ -81,36 +80,45 @@ public class MyHashMap<K, V> implements Map<K, V> {
 
     @Override
     public V get(Object key) {
-        if (table[key.hashCode() % tableSize] != null) {
-            return table[key.hashCode() % tableSize].value;
-        } else {
-            return null;
+        for (int a = 0; a < table[key.hashCode() % tableSize].length; a++) {
+            if (table[key.hashCode() % tableSize][a].key.equals(key)) {
+                return table[key.hashCode() % tableSize][a].value;
+            }
         }
+        return null;
     }
 
     @Override
-    @SuppressWarnings("unchecked")
     public V put(Object key, Object value) {
-        while (table[key.hashCode() % tableSize] != null) {
-            expand();
-        }
-        table[key.hashCode() % tableSize] = new KeyValue<>((K) key, (V) value);
+        expand();
+        return putUnchecked(key, value);
+    }
+
+    @SuppressWarnings("unchecked")
+    private V putUnchecked(Object key, Object value) {
+        table[key.hashCode() % tableSize] = addToArr(
+                table[key.hashCode() % tableSize],
+                new KeyValue<>((K) key, (V) value)
+        );
         return (V) value;
     }
 
     @Override
     public V remove(Object key) {
-        V o = table[key.hashCode() % tableSize].value;
-        table[key.hashCode() % tableSize] = null;
-        return o;
+        KeyValue<K, V>[] o = table[key.hashCode() % tableSize];
+        for (int a = 0; a < o.length; a++) {
+            if (o[a].key.equals(key)) {
+                V v = o[a].value;
+                table[key.hashCode() % tableSize] = deleteFromArr(o, a);
+                return v;
+            }
+        }
+        return null;
     }
 
     @Override
     public void putAll(Map m) {
         for (Object o : m.keySet()) {
-            while (table[o.hashCode() % tableSize] != null) {
-                expand();
-            }
             put(o, m.get(o));
         }
     }
@@ -118,15 +126,15 @@ public class MyHashMap<K, V> implements Map<K, V> {
     @SuppressWarnings("unchecked")
     @Override
     public void clear() {
-        table = new KeyValue[tableSize];
+        table = new KeyValue[tableSize][0];
     }
 
     @Override
     public Set<K> keySet() {
         HashSet<K> keys = new HashSet<>();
-        for (KeyValue<K, V> kv : table) {
-            if (kv != null) {
-                keys.add(kv.key);
+        for (int i = 0; i < tableSize; i++) {
+            for (int a = 0; a < table[i].length; a++) {
+                keys.add(table[i][a].key);
             }
         }
         return keys;
@@ -135,9 +143,9 @@ public class MyHashMap<K, V> implements Map<K, V> {
     @Override
     public Collection<V> values() {
         ArrayList<V> al = new ArrayList<>();
-        for (KeyValue<K, V> kv : table) {
-            if (kv != null) {
-                al.add(kv.value);
+        for (int i = 0; i < tableSize; i++) {
+            for (int a = 0; a < table[i].length; a++) {
+                al.add(table[i][a].value);
             }
         }
         return al;
@@ -147,5 +155,26 @@ public class MyHashMap<K, V> implements Map<K, V> {
     @Override
     public Set<Entry<K, V>> entrySet() {
         return null;
+    }
+
+    @SuppressWarnings("unchecked")
+    private KeyValue<K, V>[] deleteFromArr(KeyValue<K, V>[] arr, int index) {
+        KeyValue<K, V>[] newArr = new KeyValue[arr.length - 1];
+        for (int i = 0; i < arr.length; i++) {
+            if (i < index) {
+                newArr[i] = arr[i];
+            } else if (i > index) {
+                newArr[i - 1] = arr[i];
+            }
+        }
+        return newArr;
+    }
+
+    @SuppressWarnings("unchecked")
+    private KeyValue<K, V>[] addToArr(KeyValue<K, V>[] arr, KeyValue<K, V> o) {
+        KeyValue<K, V>[] newArr = new KeyValue[arr.length + 1];
+        System.arraycopy(arr, 0, newArr, 0, arr.length);
+        newArr[newArr.length - 1] = o;
+        return newArr;
     }
 }
