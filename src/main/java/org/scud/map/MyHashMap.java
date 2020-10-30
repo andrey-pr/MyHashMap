@@ -80,9 +80,9 @@ public class MyHashMap<K, V> implements Map<K, V> {
 
     @Override
     public V get(Object key) {
-        for (int a = 0; a < table[key.hashCode() % tableSize].length; a++) {
-            if (table[key.hashCode() % tableSize][a].key.equals(key)) {
-                return table[key.hashCode() % tableSize][a].value;
+        for (KeyValue<K, V> kv : table[key.hashCode() % tableSize]) {
+            if (kv.key.equals(key)) {
+                return kv.value;
             }
         }
         return null;
@@ -105,11 +105,11 @@ public class MyHashMap<K, V> implements Map<K, V> {
 
     @Override
     public V remove(Object key) {
-        KeyValue<K, V>[] o = table[key.hashCode() % tableSize];
-        for (int a = 0; a < o.length; a++) {
-            if (o[a].key.equals(key)) {
-                V v = o[a].value;
-                table[key.hashCode() % tableSize] = deleteFromArr(o, a);
+        KeyValue<K, V>[] row = table[key.hashCode() % tableSize];
+        for (int a = 0; a < row.length; a++) {
+            if (row[a].key.equals(key)) {
+                V v = row[a].value;
+                table[key.hashCode() % tableSize] = deleteFromArr(row, a);
                 return v;
             }
         }
@@ -160,13 +160,8 @@ public class MyHashMap<K, V> implements Map<K, V> {
     @SuppressWarnings("unchecked")
     private KeyValue<K, V>[] deleteFromArr(KeyValue<K, V>[] arr, int index) {
         KeyValue<K, V>[] newArr = new KeyValue[arr.length - 1];
-        for (int i = 0; i < arr.length; i++) {
-            if (i < index) {
-                newArr[i] = arr[i];
-            } else if (i > index) {
-                newArr[i - 1] = arr[i];
-            }
-        }
+        System.arraycopy(arr, 0, newArr, 0, index);
+        System.arraycopy(arr, index + 1, newArr, index, arr.length - index - 1);
         return newArr;
     }
 
