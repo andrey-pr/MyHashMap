@@ -8,6 +8,7 @@ import java.util.Set;
 
 public class MyHashMap<K, V> implements Map<K, V> {
     private int tableSize = 16;
+    private int sizePow = 4;
 
 
     @SuppressWarnings("unchecked")
@@ -27,17 +28,12 @@ public class MyHashMap<K, V> implements Map<K, V> {
     }
 
     @SuppressWarnings("unchecked")
-    public MyHashMap(int initialSize) {
-        tableSize = initialSize;
-        table = new KeyValue[tableSize][0];
-    }
-
-    @SuppressWarnings("unchecked")
     private void expand() {
         if (size() > tableSize / 2) {
             KeyValue<K, V>[][] oldTable = table;
+            sizePow++;
             int oldTableSize = tableSize;
-            tableSize *= 2;
+            tableSize = tableSize << 2;
             table = new KeyValue[tableSize][0];
             for (int i = 0; i < oldTableSize; i++) {
                 for (int a = 0; a < oldTable[i].length; a++) {
@@ -80,7 +76,7 @@ public class MyHashMap<K, V> implements Map<K, V> {
 
     @Override
     public V get(Object key) {
-        for (KeyValue<K, V> kv : table[key.hashCode() % tableSize]) {
+        for (KeyValue<K, V> kv : table[key.hashCode() & (0x7FFFFFFF >> (31 - sizePow))]) {
             if (kv.key.equals(key)) {
                 return kv.value;
             }
@@ -96,8 +92,8 @@ public class MyHashMap<K, V> implements Map<K, V> {
 
     @SuppressWarnings("unchecked")
     private V putUnchecked(Object key, Object value) {
-        table[key.hashCode() % tableSize] = addToArr(
-                table[key.hashCode() % tableSize],
+        table[key.hashCode() & (0x7FFFFFFF >> (31 - sizePow))] = addToArr(
+                table[key.hashCode() & (0x7FFFFFFF >> (31 - sizePow))],
                 new KeyValue<>((K) key, (V) value)
         );
         return (V) value;
@@ -105,11 +101,11 @@ public class MyHashMap<K, V> implements Map<K, V> {
 
     @Override
     public V remove(Object key) {
-        KeyValue<K, V>[] row = table[key.hashCode() % tableSize];
+        KeyValue<K, V>[] row = table[key.hashCode() & (0x7FFFFFFF >> (31 - sizePow))];
         for (int a = 0; a < row.length; a++) {
             if (row[a].key.equals(key)) {
                 V v = row[a].value;
-                table[key.hashCode() % tableSize] = deleteFromArr(row, a);
+                table[key.hashCode() & (0x7FFFFFFF >> (31 - sizePow))] = deleteFromArr(row, a);
                 return v;
             }
         }
