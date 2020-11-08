@@ -44,11 +44,11 @@ public class MyHashMap<K, V> implements Map<K, V> {
 
     @SuppressWarnings("unchecked")
     private void expand() {
-        if (size() > tableSize / 2) {
+        if (size() > tableSize >> 1) {
             MyLinkedList<Entry<K, V>>[] oldTable = table;
             sizePow++;
             int oldTableSize = tableSize;
-            tableSize = tableSize << 2;
+            tableSize = tableSize << 1;
             table = new MyLinkedList[tableSize];
             for (int i = 0; i < oldTableSize; i++) {
                 if (oldTable[i] != null) {
