@@ -6,10 +6,8 @@ import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.HashSet;
+import java.util.*;
+
 import org.junit.Test;
 
 public class MyHashMapTest {
@@ -187,5 +185,11 @@ public class MyHashMapTest {
         if (!col.contains("value") || !col.contains("value1") || !col.contains("value2")) {
             fail();
         }
+    }
+
+    @Test
+    public void entrySetVoid() {
+        MyHashMap<String, String> map = new MyHashMap<>();
+        assertEquals(new HashSet<>(), map.entrySet());
     }
 }

@@ -5,6 +5,7 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
+import org.scud.list.MyLinkedList;
 
 public class MyHashMap<K, V> implements Map<K, V> {
     private int tableSize = 16;
@@ -12,32 +13,48 @@ public class MyHashMap<K, V> implements Map<K, V> {
 
 
     @SuppressWarnings("unchecked")
-    private KeyValue<K, V>[][] table = new KeyValue[tableSize][0];
+    private MyLinkedList<Entry<K, V>>[] table = new MyLinkedList[tableSize];
 
-    private static class KeyValue<K, V> {
-        K key;
-        V value;
+    private static class MyEntry<K, V> implements Entry<K, V>{
+        private final K key;
+        private V value;
 
-        public KeyValue(K key, V value) {
+        public MyEntry(K key, V value) {
             this.key = key;
             this.value = value;
         }
-    }
 
-    public MyHashMap() {
+        @Override
+        public K getKey() {
+            return key;
+        }
+
+        @Override
+        public V getValue() {
+            return value;
+        }
+
+        @SuppressWarnings("unchecked")
+        @Override
+        public Object setValue(Object value) {
+            this.value = (V) value;
+            return value;
+        }
     }
 
     @SuppressWarnings("unchecked")
     private void expand() {
         if (size() > tableSize / 2) {
-            KeyValue<K, V>[][] oldTable = table;
+            MyLinkedList<Entry<K, V>>[] oldTable = table;
             sizePow++;
             int oldTableSize = tableSize;
             tableSize = tableSize << 2;
-            table = new KeyValue[tableSize][0];
+            table = new MyLinkedList[tableSize];
             for (int i = 0; i < oldTableSize; i++) {
-                for (int a = 0; a < oldTable[i].length; a++) {
-                    putUnchecked(oldTable[i][a].key, oldTable[i][a].value);
+                if (oldTable[i] != null) {
+                    for (int a = 0; a < oldTable[i].size(); a++) {
+                        putUnchecked(oldTable[i].get(a).getKey(), oldTable[i].get(a).getValue());
+                    }
                 }
             }
         }
@@ -47,7 +64,9 @@ public class MyHashMap<K, V> implements Map<K, V> {
     public int size() {
         int size = 0;
         for (int i = 0; i < tableSize; i++) {
-            size += table[i].length;
+            if (table[i] != null) {
+                size += table[i].size();
+            }
         }
         return size;
     }
@@ -65,9 +84,11 @@ public class MyHashMap<K, V> implements Map<K, V> {
     @Override
     public boolean containsValue(Object value) {
         for (int i = 0; i < tableSize; i++) {
-            for (int a = 0; a < table[i].length; a++) {
-                if (table[i][a].value.equals(value)) {
-                    return true;
+            if (table[i] != null) {
+                for (int a = 0; a < table[i].size(); a++) {
+                    if (table[i].get(a).getValue().equals(value)) {
+                        return true;
+                    }
                 }
             }
         }
@@ -76,9 +97,12 @@ public class MyHashMap<K, V> implements Map<K, V> {
 
     @Override
     public V get(Object key) {
-        for (KeyValue<K, V> kv : table[key.hashCode() & (0x7FFFFFFF >> (31 - sizePow))]) {
-            if (kv.key.equals(key)) {
-                return kv.value;
+        if (table[key.hashCode() & (0x7FFFFFFF >> (31 - sizePow))] == null) {
+            return null;
+        }
+        for (Entry<K, V> kv : table[key.hashCode() & (0x7FFFFFFF >> (31 - sizePow))]) {
+            if (kv.getKey().equals(key)) {
+                return kv.getValue();
             }
         }
         return null;
@@ -92,20 +116,24 @@ public class MyHashMap<K, V> implements Map<K, V> {
 
     @SuppressWarnings("unchecked")
     private V putUnchecked(Object key, Object value) {
-        table[key.hashCode() & (0x7FFFFFFF >> (31 - sizePow))] = addToArr(
-                table[key.hashCode() & (0x7FFFFFFF >> (31 - sizePow))],
-                new KeyValue<>((K) key, (V) value)
-        );
+        if (table[key.hashCode() & (0x7FFFFFFF >> (31 - sizePow))] == null) {
+            table[key.hashCode() & (0x7FFFFFFF >> (31 - sizePow))] = new MyLinkedList<>();
+        }
+        table[key.hashCode() & (0x7FFFFFFF >> (31 - sizePow))]
+                .add(new MyEntry<>((K) key, (V) value));
         return (V) value;
     }
 
     @Override
     public V remove(Object key) {
-        KeyValue<K, V>[] row = table[key.hashCode() & (0x7FFFFFFF >> (31 - sizePow))];
-        for (int a = 0; a < row.length; a++) {
-            if (row[a].key.equals(key)) {
-                V v = row[a].value;
-                table[key.hashCode() & (0x7FFFFFFF >> (31 - sizePow))] = deleteFromArr(row, a);
+        MyLinkedList<Entry<K, V>> row = table[key.hashCode() & (0x7FFFFFFF >> (31 - sizePow))];
+        if (row == null) {
+            return null;
+        }
+        for (int a = 0; a < row.size(); a++) {
+            if (row.get(a).getKey().equals(key)) {
+                V v = row.get(a).getValue();
+                row.remove(a);
                 return v;
             }
         }
@@ -122,15 +150,17 @@ public class MyHashMap<K, V> implements Map<K, V> {
     @SuppressWarnings("unchecked")
     @Override
     public void clear() {
-        table = new KeyValue[tableSize][0];
+        table = new MyLinkedList[tableSize];
     }
 
     @Override
     public Set<K> keySet() {
         HashSet<K> keys = new HashSet<>();
         for (int i = 0; i < tableSize; i++) {
-            for (int a = 0; a < table[i].length; a++) {
-                keys.add(table[i][a].key);
+            if (table[i] != null) {
+                for (int a = 0; a < table[i].size(); a++) {
+                    keys.add(table[i].get(a).getKey());
+                }
             }
         }
         return keys;
@@ -140,32 +170,23 @@ public class MyHashMap<K, V> implements Map<K, V> {
     public Collection<V> values() {
         ArrayList<V> al = new ArrayList<>();
         for (int i = 0; i < tableSize; i++) {
-            for (int a = 0; a < table[i].length; a++) {
-                al.add(table[i][a].value);
+            if (table[i] != null) {
+                for (int a = 0; a < table[i].size(); a++) {
+                    al.add(table[i].get(a).getValue());
+                }
             }
         }
         return al;
     }
 
-    @SuppressWarnings("ConstantConditions")
     @Override
     public Set<Entry<K, V>> entrySet() {
-        return null;
-    }
-
-    @SuppressWarnings("unchecked")
-    private KeyValue<K, V>[] deleteFromArr(KeyValue<K, V>[] arr, int index) {
-        KeyValue<K, V>[] newArr = new KeyValue[arr.length - 1];
-        System.arraycopy(arr, 0, newArr, 0, index);
-        System.arraycopy(arr, index + 1, newArr, index, arr.length - index - 1);
-        return newArr;
-    }
-
-    @SuppressWarnings("unchecked")
-    private KeyValue<K, V>[] addToArr(KeyValue<K, V>[] arr, KeyValue<K, V> o) {
-        KeyValue<K, V>[] newArr = new KeyValue[arr.length + 1];
-        System.arraycopy(arr, 0, newArr, 0, arr.length);
-        newArr[newArr.length - 1] = o;
-        return newArr;
+        Set<Entry<K, V>> set = new HashSet<>();
+        for (int i = 0; i < tableSize; i++) {
+            if (table[i] != null) {
+                set.addAll(table[i]);
+            }
+        }
+        return set;
     }
 }
