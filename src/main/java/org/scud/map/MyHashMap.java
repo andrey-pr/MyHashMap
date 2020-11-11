@@ -1,22 +1,19 @@
 package org.scud.map;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
+
 import org.scud.list.MyLinkedList;
 
 public class MyHashMap<K, V> implements Map<K, V> {
     private int tableSize = 16;
     private int sizePow = 4;
-    private int entryTTL = 0;
+    private AutoRemover autoRemover;
 
     public MyHashMap() {
     }
 
-    public MyHashMap(int entryTTL) {
-        this.entryTTL = entryTTL;
+    public MyHashMap(int entryTimeToLive) {
+        autoRemover = new AutoRemover(this, entryTimeToLive);
     }
 
     @SuppressWarnings("unchecked")
@@ -52,24 +49,44 @@ public class MyHashMap<K, V> implements Map<K, V> {
     @SuppressWarnings("rawtypes")
     static class AutoRemover extends Thread {
         MyHashMap map;
-        Object key;
         int timeout;
+        Queue<Ticket> queue = new LinkedList<>();
+        static class Ticket{
+            long timeToDie;
+            Object key;
 
-        public AutoRemover(MyHashMap map, Object key, int timeout) {
+            public Ticket(long timeToDie, Object key) {
+                this.timeToDie = timeToDie;
+                this.key = key;
+            }
+        }
+
+        public AutoRemover(MyHashMap map, int timeout) {
             this.map = map;
-            this.key = key;
             this.timeout = timeout;
+            start();
+        }
+
+        public void add(Object key){
+            queue.add(new Ticket(System.currentTimeMillis() + timeout, key));
         }
 
         @Override
         public void run() {
             super.run();
-            try {
-                sleep(timeout);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
+            //noinspection InfiniteLoopStatement
+            while (true) {
+                try {
+                    //noinspection BusyWait
+                    sleep(100);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+                while (queue.peek() != null && queue.peek().timeToDie < System.currentTimeMillis()) {
+                    //noinspection ConstantConditions
+                    map.remove(queue.poll().key);
+                }
             }
-            map.remove(key);
         }
     }
 
@@ -142,8 +159,8 @@ public class MyHashMap<K, V> implements Map<K, V> {
     @Override
     public V put(Object key, Object value) {
         expand();
-        if (entryTTL != 0) {
-            new AutoRemover(this, key, entryTTL).start();
+        if (autoRemover != null) {
+            autoRemover.add(key);
         }
         return putUnchecked(key, value);
     }
