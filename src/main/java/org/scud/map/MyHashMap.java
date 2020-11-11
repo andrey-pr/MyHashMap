@@ -10,12 +10,19 @@ import org.scud.list.MyLinkedList;
 public class MyHashMap<K, V> implements Map<K, V> {
     private int tableSize = 16;
     private int sizePow = 4;
+    private int entryTTL = 0;
 
+    public MyHashMap() {
+    }
+
+    public MyHashMap(int entryTTL) {
+        this.entryTTL = entryTTL;
+    }
 
     @SuppressWarnings("unchecked")
     private MyLinkedList<Entry<K, V>>[] table = new MyLinkedList[tableSize];
 
-    private static class MyEntry<K, V> implements Entry<K, V>{
+    private static class MyEntry<K, V> implements Entry<K, V> {
         private final K key;
         private V value;
 
@@ -39,6 +46,30 @@ public class MyHashMap<K, V> implements Map<K, V> {
         public Object setValue(Object value) {
             this.value = (V) value;
             return value;
+        }
+    }
+
+    @SuppressWarnings("rawtypes")
+    static class AutoRemover extends Thread {
+        MyHashMap map;
+        Object key;
+        int timeout;
+
+        public AutoRemover(MyHashMap map, Object key, int timeout) {
+            this.map = map;
+            this.key = key;
+            this.timeout = timeout;
+        }
+
+        @Override
+        public void run() {
+            super.run();
+            try {
+                sleep(timeout);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+            map.remove(key);
         }
     }
 
@@ -111,6 +142,9 @@ public class MyHashMap<K, V> implements Map<K, V> {
     @Override
     public V put(Object key, Object value) {
         expand();
+        if (entryTTL != 0) {
+            new AutoRemover(this, key, entryTTL).start();
+        }
         return putUnchecked(key, value);
     }
 

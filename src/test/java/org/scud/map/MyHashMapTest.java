@@ -6,8 +6,9 @@ import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
-import java.util.*;
-
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.HashSet;
 import org.junit.Test;
 
 public class MyHashMapTest {
@@ -146,7 +147,7 @@ public class MyHashMapTest {
 
     @Test
     public void putAll() {
-        HashMap<String, String> map2 = new HashMap<>();
+        MyHashMap<String, String> map2 = new MyHashMap<>();
         map2.put("key", "value");
         map2.put("key1", "value1");
         map2.put("key2", "value2");
@@ -191,5 +192,37 @@ public class MyHashMapTest {
     public void entrySetVoid() {
         MyHashMap<String, String> map = new MyHashMap<>();
         assertEquals(new HashSet<>(), map.entrySet());
+    }
+
+    @Test
+    public void autoRemoveTest() {
+        MyHashMap<String, String> map = new MyHashMap<>(1000);
+        map.put("key", "value");
+        map.put("key1", "value1");
+        map.put("key2", "value2");
+        try {
+            Thread.sleep(1100); //почему-то без дополнительных 100мс не успевает удалить TODO
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+        assertEquals(0, map.size());
+    }
+
+    @Test
+    public void autoRemoveTest2() {
+        MyHashMap<String, String> map = new MyHashMap<>(1000);
+        map.put("key", "value");
+        try {
+            Thread.sleep(500);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+        map.put("key1", "value1");
+        try {
+            Thread.sleep(600); //почему-то без дополнительных 100мс не успевает удалить TODO
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+        assertEquals(1, map.size());
     }
 }
